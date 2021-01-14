@@ -1,0 +1,3 @@
+$HAToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiI1ZmU3NzI2MWJmNDk0ZTIxYWFmNzMwNWExMTBlZGZmNyIsImlhdCI6MTYxMDYxNjU1MCwiZXhwIjoxOTI1OTc2NTUwfQ.7ijNh7ULNSA3Pv8Uxz_LbHTuvx5OUmySqiiubl2c0AQ" # Example: eyJ0eXAiOiJKV1...
+$UserName = "eduard" # When not sure, open a command prompt and type: echo %USERNAME%
+$HAUrl = "https://ha.eavv.nl" # Example: https://yourha.duckdns.org

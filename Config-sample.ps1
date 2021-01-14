@@ -1,0 +1,3 @@
+$HAToken = "<ha token>" # Example: eyJ0eXAiOiJKV1...
+$UserName = "<ha username>" # When not sure, open a command prompt and type: echo %USERNAME%
+$HAUrl = "<ha address>" # Example: https://yourha.duckdns.org

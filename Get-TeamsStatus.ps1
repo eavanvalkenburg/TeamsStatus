@@ -16,16 +16,20 @@
 .PARAMETER SetStatus
     Run the script with the SetStatus-parameter to set the status of Microsoft Teams
     directly from the commandline.
+.PARAMETER SetActivity
+    Run the script with the SetActivity-parameter to set the activity of Microsoft Teams
+    directly from the commandline to "In a call" or "Not in a call".
 .EXAMPLE
     .\Get-TeamsStatus.ps1 -SetStatus "Offline"
 #>
 # Configuring parameter for interactive run
-Param($SetStatus)
+Param($SetStatus, $SetActivity)
 
 # Configure the variables below that will be used in the script
-$HAToken = "<Insert token>" # Example: eyJ0eXAiOiJKV1...
-$UserName = "<UserName>" # When not sure, open a command prompt and type: echo %USERNAME%
-$HAUrl = "<HAUrl>" # Example: https://yourha.duckdns.org
+. .\Config.ps1
+# $HAToken = "<Insert token>" # Example: eyJ0eXAiOiJKV1...
+# $UserName = "<UserName>" # When not sure, open a command prompt and type: echo %USERNAME%
+# $HAUrl = "<HAUrl>" # Example: https://yourha.duckdns.org
 
 # Set language variables below
 $lgAvailable = "Available"
@@ -40,6 +44,7 @@ $lgInACall = "In a call"
 # Set icons to use for call activity
 $iconInACall = "mdi:phone-in-talk-outline"
 $iconNotInACall = "mdi:phone-off"
+$iconTeams = "mdi:microsoft-teams"
 
 ################################################################
 # Don't edit the code below, unless you know what you're doing #
@@ -48,16 +53,40 @@ $headers = @{"Authorization"="Bearer $HAToken";}
 $Enable = 1
 
 # Run the script when a parameter is used and stop when done
-If($null -ne $SetStatus){
-    Write-Host ("Setting Microsoft Teams status to "+$SetStatus+":")
-    $params = @{
-     "state"="$SetStatus";
-     "attributes"= @{
-        "friendly_name"="Microsoft Teams status";
-        "icon"="mdi:microsoft-teams";
+If(($null -ne $SetStatus) -or ($null -ne $SetActivity)){
+    If($null -ne $SetStatus){
+        Write-Host ("Setting Microsoft Teams status to "+$SetStatus+":")
+        $params = @{
+        "state"="$SetStatus";
+        "attributes"= @{
+            "friendly_name"="Microsoft Teams status";
+            "icon"=$iconTeams;
+            }
         }
-     }
-    Invoke-RestMethod -Uri "$HAUrl/api/states/sensor.teams_status" -Method POST -Headers $headers -Body ($params|ConvertTo-Json) -ContentType "application/json"
+        Invoke-RestMethod -Uri "$HAUrl/api/states/sensor.teams_status" -Method POST -Headers $headers -Body ($params|ConvertTo-Json) -ContentType "application/json"
+        Start-Sleep -Milliseconds 500
+    }
+
+    If($null -ne $SetActivity){
+        If($SetActivity -eq $lgInACall){
+            $ActivityIcon = $iconInACall
+        }
+        ElseIf($SetActivity -eq $lgNotInACall){
+            $ActivityIcon = $iconNotInACall
+        }
+        Else{
+            $ActivityIcon = $iconTeams
+        }
+        Write-Host ("Setting Microsoft Teams activity to "+$SetActivity+":")
+        $params = @{
+        "state"="$SetActivity";
+        "attributes"= @{
+            "friendly_name"="Microsoft Teams activity";
+            "icon"=$ActivityIcon;
+            }
+        }
+        Invoke-RestMethod -Uri "$HAUrl/api/states/sensor.teams_activity" -Method POST -Headers $headers -Body ($params|ConvertTo-Json) -ContentType "application/json"
+    }
     break
 }
 
@@ -143,7 +172,7 @@ If ($CurrentStatus -ne $Status) {
      "state"="$CurrentStatus";
      "attributes"= @{
         "friendly_name"="Microsoft Teams status";
-        "icon"="mdi:microsoft-teams";
+        "icon"=$iconTeams;
         }
      }
     Invoke-RestMethod -Uri "$HAUrl/api/states/sensor.teams_status" -Method POST -Headers $headers -Body ($params|ConvertTo-Json) -ContentType "application/json" 
